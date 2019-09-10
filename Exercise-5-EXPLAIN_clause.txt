@@ -1,0 +1,85 @@
+Exercise : Exercise 7: Using EXPLAIN to optimize SQL queries
+
+Q1: What do different columns in the output of EXPLAIN mean? What possible values can those have? What is the meaning of those values?
+
+A1: 1)id 
+The SELECT identifier. This is the sequential number of the SELECTs within the query.
+2)select_type
+The type of select like for DELETE statements the select type is DELETE.
+3)table
+The name of the table whose output is being represented.
+4)partitions 
+The no of partitions in the table if present, else Null.
+5)type 
+The tye of join the query is using like ref,all,eq_ref.
+6)possible_keys 
+This shows the present INDEXES from which the query can match the qualified data and the order is not as per the definitions of query.
+7)key 
+The actual key or INDEX MySql is using to look up rows.
+8)key_len
+The key length of key which MySql chooses to look up rows.
+9)ref 
+The ref column shows which columns are compared to the index.
+10)rows 
+The no of rows MySql checks for successful execution of query.
+11)filtered 
+Shows the % of rows filtered by the clauses in the where column of query.
+12)Extra 
+any extra data of how MySql resolves the query.
+
+
+Q2.1: The value under 'rows' column in the output of EXPLAIN query and SELECT query after it are same. What does it mean?
+A: It means the no of rows MySql has to check and iterate for successful execution of query and get the desired result which is user_id = 41.
+
+Q2.2: Is the SELECT query optimal? If no, how do we optimize it?
+A: NO, as we can see in the key column of explain query output, MySql has got no INDEX to look up and get result in optimized way.
+To do so we can add an INDEX to the ID column of comments Table like:-
+CREATE UNIQUE INDEX index_id ON comments (id); //unique since we are choosing ID as the column to be indexed and ids cant be duplicate.
+
+
+Q3.1: We decide to index columns in comments table to optimize the SELECT query. What column(s) will you index in which order?
+Ask the exercise creator for a hint if you are confused.
+
+A: We can consider those columns which are present in where clause or in join statements.
+In here commentable_id ,commentable_type and user_id are present in where clause so its best to index these columns.
+Now,the order of these columns depends upon the no of matching rows they return on querying.The least matching row column should be 
+INDEXED first and rest in similar way.
+Here it looks like commentable_type returns least matching rows so we can follow this order:
+CREATE UNIQUE INDEX indexer ON comments (commentable_type,commentable_id,user_id);
+
+Q4.1: EXPLAIN a SELECT query against one of your databases which employs an INNER JOIN between two tables. What does the output look like?
+ What does the values under different columns mean? Do you get only one row in EXPLAIN's output?
+
+   EXPLAIN SELECT distinct holdings.branch FROM holdings
+   JOIN titles ON holdings.Title=titles.Title
+   WHERE titles.author='Ann Brown';
+
+A:id,select_type,table,partitions,type,possible_keys,key,key_len,ref,rows,filtered,Extra
+1,SIMPLE,titles,NULL,ALL,PRIMARY,NULL,NULL,NULL,5,40.00,"Using where; Using temporary"
+1,SIMPLE,holdings,NULL,ref,"Branch,Title",Title,83,exercise1.titles.Title,2,100.00,NULL 
+
+select_type- it means the type of select we are employing like its a SIMPLE select here in this case.
+table- shows the name of table being used in the query.
+partitions- shows of any table is partitioned.
+type- showing which join is being used here like ALL means a full table scan done for each combination of rows.
+and ref means all rows of matching values are read from holdings table and are compared to the values returned from the titles table.
+possible_keys- shows the indexed which can be used which are Branch and Title which are keys.
+key- shows the title which MySql is using for querying which is a primary key in Titles table.
+key_len- the number of bytes that MySQL uses from the key which title here.
+ref- so here we can see its null in titles table and in holdings table its title which is being compared to the holdings column values.
+rows- table title is looking to 5 rows while matching and holdings 2.
+filtered- due to where clause and join we can see we have filtered 2 rows out of 5 in titles table which is shown in filtered column.
+Extra- giving any additional details like we are using a where clause here so its mentioning that.
+
+
+Q4.2 Form the same select query in above question using a subquery instead of a JOIN.
+What does the EXPLAIN output look like now? Which query is better and why?
+
+   EXPLAIN SELECT DISTINCT branch FROM holdings WHERE Title IN(
+   SELECT title FROM titles WHERE author='Ann Brown');
+
+A:id,select_type,table,partitions,type,possible_keys,key,key_len,ref,rows,filtered,Extra
+1,SIMPLE,titles,NULL,ALL,PRIMARY,NULL,NULL,NULL,5,40.00,"Using where; Using temporary"
+1,SIMPLE,holdings,NULL,ref,"Branch,Title",Title,83,exercise1.titles.Title,2,100.00,NULL 
+
+JOINS are better as the execution time in case of large data is less than that of a subquery.
