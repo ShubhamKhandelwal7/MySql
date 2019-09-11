@@ -1,46 +1,47 @@
 -- manage(create, update, delete) categories, articles, comments, and users --
 CREATE TABLE users
 (
-name VARCHAR(20) PRIMARY KEY,
+ID INTEGER PRIMARY KEY,
+name VARCHAR(20),
 type VARCHAR(10)
 );
 CREATE TABLE articles
 (
-article VARCHAR(20) PRIMARY KEY,
-author VARCHAR(20),
-FOREIGN KEY (author) REFERENCES users(name)
+paper VARCHAR(20) PRIMARY KEY,
+author_ID INTEGER,
+FOREIGN KEY (author_ID) REFERENCES users(ID)
 );
-CREATE TABLE category
+CREATE TABLE categories
 (
 article VARCHAR(20),
 category VARCHAR(20),
-FOREIGN KEY (article) REFERENCES articles(article)
+FOREIGN KEY (article) REFERENCES articles(paper)
 );
 CREATE TABLE comments 
 (
 article VARCHAR(20),
 comment VARCHAR(30),
-commented_by VARCHAR(20),
-FOREIGN KEY (article) REFERENCES articles(article),
-FOREIGN KEY (commented_by) REFERENCES users(name)
+commented_by INTEGER,
+FOREIGN KEY (article) REFERENCES articles(paper),
+FOREIGN KEY (commented_by) REFERENCES users(ID)
 );
 
 INSERT INTO users
-VALUES ('user1','Admin'),
-('user2','Normal'),
-('user3','Normal'),
-('user4','Normal');
+VALUES (1,'user1','Admin'),
+(2,'user2','Normal'),
+(3,'user3','Normal'),
+(4,'user4','Normal');
 
 INSERT INTO articles
-VALUES ('Amazon Fires','user1'),
-('ISRO Chandrayaan','user2'),
-('Polotical Dilemma','user1'),
-('US Open','user3'),
-('Addicting Cinema','user4'),
-('Gulf Crisis','user4'),
-('RPA Takedown','user4');
+VALUES ('Amazon Fires',1),
+('ISRO Chandrayaan',2),
+('Polotical Dilemma',1),
+('US Open',3),
+('Addicting Cinema',4),
+('Gulf Crisis',4),
+('RPA Takedown',4);
 
-INSERT INTO category
+INSERT INTO categories
 VALUES ('Amazon Fires','Nature'),
 ('ISRO Chandrayaan','Science'),
 ('Polotical Dilemma','Politics'),
@@ -50,39 +51,45 @@ VALUES ('Amazon Fires','Nature'),
 ('RPA Takedown','Science');
 
 INSERT INTO comments
-VALUES ('Amazon Fires','Alarmng!!','user3'),
-('ISRO Chandrayaan','New Leap Forward','user1'),
-('US Open','great games','user2'),
-('Amazon Fires','Concerning','user3'),
-('ISRO Chandrayaan','great larnings','user4'),
-('Gulf Crisis','Unlooked','user3'),
-('RPA Takedown','New Beginning','user2'),
-('ISRO Chandrayaan','Promising','user1');
+VALUES ('Amazon Fires','Alarmng!!',3),
+('ISRO Chandrayaan','New Leap Forward',1),
+('US Open','great games',2),
+('Amazon Fires','Concerning',3),
+('ISRO Chandrayaan','great larnings',4),
+('Gulf Crisis','Unlooked',3),
+('RPA Takedown','New Beginning',2),
+('ISRO Chandrayaan','Promising',1);
 
 DROP TABLE users;
 DROP TABLE articles;
-DROP TABLE category;
+DROP TABLE categories;
 DROP TABLE comments;
 
 -- select all articles whose author's name is user3 (Do this exercise using variable also). --
 SET @user_name='user3';
-SELECT article 
-FROM articles WHERE author=@user_name;
+SELECT paper 
+FROM articles WHERE author_ID =(
+SELECT ID FROM users 
+WHERE name=@user_name);
 
 -- For all the articles being selected above, select all the articles and also the comments associated with those articles in a single query --
-SELECT articles.article, comments.comment
+SELECT articles.paper, comments.comment
 FROM articles 
-JOIN comments ON articles.article=comments.article
-WHERE articles.author='user3';
+JOIN comments ON articles.paper=comments.article
+WHERE articles.author_ID=(
+SELECT ID FROM users 
+WHERE name='user3');
 
 SELECT article, comment
 FROM comments WHERE article IN(
-SELECT article FROM articles
-WHERE author='user3');
+SELECT paper FROM articles
+WHERE author_ID=(
+SELECT ID FROM users 
+WHERE name='user3'));
 
 -- Write a query to select all articles which do not have any comments --
-SELECT article FROM articles
-WHERE articles.article NOT IN (
+SELECT paper FROM articles
+WHERE articles.paper NOT IN (
 SELECT article FROM comments);
 
 -- Write a query to select article which has maximum comments --
@@ -93,7 +100,7 @@ select COUNT(article) from comments group by article);
 
 -- Write a query to select article which does not have more than one comment by the same user  --
 
-SELECT articles.article FROM comments
-Left JOIN articles ON comments.article=articles.article
+SELECT articles.paper FROM comments
+Left JOIN articles ON comments.article=articles.paper
 GROUP BY comments.article
 HAVING count(comments.commented_by)<=1;
