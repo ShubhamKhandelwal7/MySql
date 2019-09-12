@@ -47,35 +47,31 @@ VALUES (1,1,5000),
 (5,2,3000),
 (6,4,2000),
 (7,5,1000),
-(8,6,5000);
-
+(8,6,9000);
 
 SELECT emp.name, sum(comm.COMMISSION_AMOUNT) 
 FROM employees AS emp
 JOIN Commissions AS comm ON emp.ID = comm.employee_ID
 GROUP BY comm.employee_ID
-HAVING sum(comm.COMMISSION_AMOUNT)>=ALL(
+HAVING sum(comm.COMMISSION_AMOUNT)>=(
 SELECT sum(comm.COMMISSION_AMOUNT) 
 FROM Commissions AS comm 
-GROUP BY comm.employee_id);
+GROUP BY comm.employee_id ORDER BY comm.COMMISSION_AMOUNT DESC LIMIT 1);
 
-SELECT name,max(salary) 
+SELECT name,salary
 FROM employees
-WHERE salary NOT IN(SELECT * FROM(
-SELECT salary FROM employees 
-ORDER BY salary DESC LIMIT 3) temp);
--- another easier approach for the same problem --
-SELECT name,salary FROM employees 
-ORDER BY salary DESC LIMIT 3,1;
+WHERE salary =(
+SELECT DISTINCT salary FROM employees 
+ORDER BY salary DESC LIMIT 3,1);
 
 SELECT dept.name,sum(comm.Commission_amount) 
 FROM Commissions  AS comm 
 JOIN Employees AS emp ON comm.employee_id=emp.id
 JOIN Departments AS dept ON emp.department_id=dept.id
 GROUP BY comm.employee_id
-HAVING sum(comm.commission_amount)>=ALL(
+HAVING sum(comm.commission_amount)>=(
 SELECT sum(comm.Commission_amount) FROM Commissions AS comm
-GROUP BY comm.employee_id);
+GROUP BY comm.employee_id ORDER BY COMM.Commission_amount DESC LIMIT 1 );
 
 SELECT CONCAT(group_CONCAT(emp.name order by emp.name),' ',comm.Commission_amount) AS Employees 
 FROM Commissions AS comm
