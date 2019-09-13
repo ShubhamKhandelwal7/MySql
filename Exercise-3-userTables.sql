@@ -8,7 +8,7 @@ type VARCHAR(10)
 CREATE TABLE categories
 (
 ID INTEGER AUTO_INCREMENT PRIMARY KEY,
-types VARCHAR(20)
+name VARCHAR(20) 
 );
 CREATE TABLE articles
 (
@@ -36,7 +36,7 @@ VALUES ('user1','Admin'),
 ('user3','Normal'),
 ('user4','Normal');
 
-INSERT INTO categories(types)
+INSERT INTO categories(name)
 VALUES ('Nature'),
 ('Science'),
 ('Politics'),
@@ -61,10 +61,12 @@ VALUES (1,'Alarmng!!',3),
 (6,'Unlooked',3),
 (7,'New Beginning',2),
 (2,'Promising',1);
-
+select * from articles;
 UPDATE articles
 SET content='ISRO Chandrayaan II'  
 WHERE ID=2;
+DELETE FROM articles
+WHERE ID=5;
 DELETE FROM articles
 WHERE ID=8;
 
@@ -83,29 +85,31 @@ WHERE articles.user_id IN(
 SELECT ID FROM users 
 WHERE name='user3');
 
-SELECT (SELECT content FROM articles WHERE id=article_id), remark
-FROM comments WHERE article_id IN(
-SELECT id FROM articles
-WHERE user_id=(
-SELECT ID FROM users 
-WHERE name='user3'));
+SELECT articles.content, comments.remark
+FROM articles 
+JOIN comments ON articles.id=comments.article_id
+JOIN users ON articles.user_id=users.id
+WHERE name='user3';
 
 -- Write a query to select all articles which do not have any comments --
 SELECT content FROM articles
 WHERE articles.id NOT IN (
 SELECT article_id FROM comments);
 
--- Write a query to select article which has maximum comments --
-SELECT content FROM articles 
-WHERE id IN(
-SELECT article_id FROM comments 
-GROUP BY article_id
-HAVING COUNT(article_id) >=All (
-SELECT COUNT(article_id) FROM comments GROUP BY article_id));
+SELECT articles.content FROM articles
+LEFT JOIN comments ON articles.id=comments.article_id
+WHERE comments.article_id IS NULL;
 
+-- Write a query to select article which has maximum comments --
+
+SELECT content FROM articles 
+JOIN comments ON articles.id=comments.article_id
+GROUP BY comments.article_id
+HAVING COUNT(comments.article_id)>=All (
+SELECT COUNT(article_id) FROM comments GROUP BY article_id);
 -- Write a query to select article which does not have more than one comment by the same user  --
 
-SELECT articles.content,count(comments.remarked_by) FROM comments
+SELECT articles.content FROM comments
 Left JOIN articles ON comments.article_id=articles.id
 GROUP BY comments.article_id
 HAVING count( comments.remarked_by)<=1;
