@@ -66,7 +66,7 @@ UPDATE articles
 SET content='ISRO Chandrayaan II'  
 WHERE ID=2;
 DELETE FROM articles
-WHERE ID=5;
+WHERE ID=6;
 DELETE FROM articles
 WHERE ID=8;
 
