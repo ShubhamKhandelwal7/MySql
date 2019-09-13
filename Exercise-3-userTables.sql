@@ -7,22 +7,25 @@ type VARCHAR(10)
 );
 CREATE TABLE articles
 (
-paper VARCHAR(20) PRIMARY KEY,
-author_ID INTEGER,
-FOREIGN KEY (author_ID) REFERENCES users(ID)
+ID INTEGER AUTO_INCREMENT PRIMARY KEY, 
+content VARCHAR(20),
+users_ID INTEGER,
+categories_ID INTEGER,
+FOREIGN KEY (users_ID) REFERENCES users(ID),
+FOREIGN KEY (categories_ID) REFERENCES categories(ID)
 );
 CREATE TABLE categories
 (
-article VARCHAR(20),
-category VARCHAR(20),
-FOREIGN KEY (article) REFERENCES articles(paper)
+ID INTEGER AUTO_INCREMENT PRIMARY KEY,
+category VARCHAR(20)
 );
 CREATE TABLE comments 
 (
-article VARCHAR(20),
+ID INTEGER AUTO_INCREMENT PRIMARY KEY,
+articles_ID INTEGER,
 comment VARCHAR(30),
 commented_by INTEGER,
-FOREIGN KEY (article) REFERENCES articles(paper),
+FOREIGN KEY (articles_ID) REFERENCES articles(ID),
 FOREIGN KEY (commented_by) REFERENCES users(ID)
 );
 
