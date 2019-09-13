@@ -1,7 +1,7 @@
 -- manage(create, update, delete) categories, articles, comments, and users --
 CREATE TABLE users
 (
-ID INTEGER PRIMARY KEY,
+ID INTEGER AUTO_INCREMENT PRIMARY KEY,
 name VARCHAR(20),
 type VARCHAR(10)
 );
