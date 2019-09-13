@@ -61,7 +61,7 @@ VALUES (1,'Alarmng!!',3),
 (6,'Unlooked',3),
 (7,'New Beginning',2),
 (2,'Promising',1);
-select * from articles;
+
 UPDATE articles
 SET content='ISRO Chandrayaan II'  
 WHERE ID=2;
